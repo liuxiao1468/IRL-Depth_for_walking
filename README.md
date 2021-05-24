@@ -8,5 +8,5 @@ The bottlenect has size 64
 The building blocks include regular conv layers (with kernel 3x3 and 1x1), conv_blocks and identity_blocks (from Resnet).
 Loss function: MSE + gradient + Total variance (TV)
 
-Input: 180x320 RGB images
-Output: 180x320 depth images
+Input: 90x160 RGB images
+Output: 90x160 depth images
