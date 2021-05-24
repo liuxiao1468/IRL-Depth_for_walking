@@ -75,7 +75,7 @@ class get_dataset():
 		depth_data = np.array(depth_data).reshape(-1, height, width, 1)
 		train_data = np.float32(train_data / 255.)
 		depth_data = np.float32(depth_data)
-		depth_data = self.transform_ground_truth(depth_data)
+		# depth_data = self.transform_ground_truth(depth_data)
 
 		return train_data, depth_data
 
@@ -185,7 +185,7 @@ class get_dataset():
 			depth_data = np.array(depth_data).reshape(-1, height, width, 1)
 			train_data = np.float32(train_data / 255.)
 			depth_data = np.float32(depth_data)
-			depth_data = self.transform_ground_truth(depth_data)
+			# depth_data = self.transform_ground_truth(depth_data)
 
 			yield (train_data, depth_data)
 
@@ -231,6 +231,6 @@ class get_dataset():
 			depth_data = np.array(depth_data).reshape(-1, height, width, 1)
 			train_data = np.float32(train_data / 255.)
 			depth_data = np.float32(depth_data)
-			depth_data = self.transform_ground_truth(depth_data)
+			# depth_data = self.transform_ground_truth(depth_data)
 
 			yield (train_data, depth_data)
