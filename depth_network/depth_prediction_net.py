@@ -29,6 +29,7 @@ from tensorflow.keras.utils import plot_model
 from tensorflow.keras.applications.resnet50 import ResNet50
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.resnet50 import preprocess_input, decode_predictions
+from tensorflow.keras.applications import EfficientNetB0
 
 
 class get_depth_net():

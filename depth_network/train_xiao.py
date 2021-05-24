@@ -10,6 +10,7 @@ import numpy as np
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.applications import EfficientNetB0
 
 TF_FORCE_GPU_ALLOW_GROWTH=True
 
@@ -43,18 +44,16 @@ validation_gen = get_dataset.validation_generator(batch_size)
 # print(Disp_ResNet_autoencoder.summary())
 
 opt = Adam(lr=1e-5)
-Disp_ResNet_autoencoder = get_depth_net.ResNet_autoencoder(height, width, 3, 64)
-Disp_ResNet_autoencoder.compile(optimizer=opt, loss=get_loss.autoencoder_loss)
-print(Disp_ResNet_autoencoder.summary())
+Disp_ResNet_autoencoder = get_depth_net.res_50_disp_autoencoder(height, width, 3)
+Disp_ResNet_autoencoder.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/8, 1/4, 1/2])
+# print(Disp_ResNet_autoencoder.summary())
 
-mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/RSS/saved_model_v3/weights{epoch:08d}.h5', save_weights_only=False, period=3)
+mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/model_v1/weights{epoch:08d}.h5', save_weights_only=False, period=5)
 
 # NAME = "depth_net_2.0"
 # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
 
+Disp_ResNet_autoencoder.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
 
-Disp_ResNet_autoencoder.fit_generator(train_gen, steps_per_epoch =1875, validation_data = validation_gen, epochs=60, validation_steps= 100, callbacks=[mc])
-
-# Disp_ResNet_autoencoder.save('/tfdepth/model_HD/NYU_'+str(i)+'_DispNet_autoencoder.h5')
 
 
