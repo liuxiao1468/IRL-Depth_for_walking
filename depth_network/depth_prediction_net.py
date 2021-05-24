@@ -836,6 +836,133 @@ class get_depth_net():
         return new_model
 
 
+    def ResNet_resblock_disp_autoencoder(self, height, width, depth):
+        inputs = Input(shape=(height, width, depth))
+        model = ResNet50(weights='imagenet',include_top=False,input_shape=(height, width,3))
+        # X = model(inputs, training=True)
+        # model.summary()
+        skip_1 = model.layers[4].output
+        skip_2 = model.layers[38].output
+        skip_3 = model.layers[80].output
+        skip_4 = model.layers[142].output
+        skip_5 = model.layers[174].output
+        X = model.layers[-1].output
+        print('E1-------', skip_1.shape)
+        print('E2-------', skip_2.shape)
+        print('E3-------', skip_3.shape)
+        print('E4-------', skip_4.shape)
+
+        print("5---- ",X.shape)
+
+        # # # decoder Stage 1
+        # X = Concatenate()([X, skip_5])
+
+        X, _ = self.identity_block_transpose(
+            X, 3, [2048, 2048, 2048], stage=6, block='b')
+        X = Conv2DTranspose(512, (1, 1), strides=(
+            1, 1), padding='same', kernel_initializer=glorot_uniform(seed=0))(X)
+        X, _ = self.convolutional_block_transpose(
+            X, f=3, filters=[512, 256, 256], stage=6, block='a', s=2)
+
+
+        # # # decoder Stage 2
+        X = Concatenate()([X, skip_4])
+        X = Conv2D(512, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        print("4---- ",X.shape)
+
+        X, _ = self.identity_block_transpose(
+            X, 3, [512, 512, 512], stage=7, block='b')
+        X = Conv2DTranspose(256, (1, 1), strides=(
+            1, 1), padding='same', kernel_initializer=glorot_uniform(seed=0))(X)
+        X, _ = self.convolutional_block_transpose(
+            X, f=3, filters=[256, 128, 128], stage=7, block='a', s=2)
+        # X = Cropping2D(cropping=((1, 0), (0, 0)), data_format=None)(X)
+
+        # # decoder Stage 3
+
+        
+        X = Concatenate()([X, skip_3])
+        X = Conv2D(256, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        print("3---- ",X.shape)
+
+
+        X, _ = self.identity_block_transpose(
+            X, 3, [256, 256, 256], stage=8, block='b')
+        X = Conv2DTranspose(256, (1, 1), strides=(
+            1, 1), padding='same', kernel_initializer=glorot_uniform(seed=0))(X)
+        X, _ = self.convolutional_block_transpose(
+            X, f=3, filters=[128, 64, 64], stage=8, block='a', s=2)
+        X = Cropping2D(cropping=((1, 0), (0, 0)), data_format=None)(X)
+
+        prediction = Conv2D(1, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        prediction = Activation('sigmoid')(prediction)
+        print("pre_5---- ",prediction.shape)
+        pre_5 = prediction
+
+        # # # decoder Stage 4
+
+        
+        X = Concatenate()([X, skip_2])
+        X = Conv2D(128, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        print("2---- ",X.shape)
+
+
+        X = Conv2DTranspose(128, (1, 1), strides=(
+            1, 1), name='conv9-1', padding='same', kernel_initializer=glorot_uniform(seed=0))(X)
+        X = BatchNormalization(axis=3, name='bn_conv9-1')(X)
+        X = Activation('relu')(X)
+        X = Conv2DTranspose(64, (3, 3), strides=(2, 2), name='conv9-2',
+                            padding='same', kernel_initializer=glorot_uniform(seed=0))(X)
+        X = BatchNormalization(axis=3, name='bn_conv9-2')(X)
+        X = Activation('relu')(X)
+        X = Cropping2D(cropping=((1, 0), (0, 0)), data_format=None)(X)
+
+        prediction = Conv2D(1, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        prediction = Activation('sigmoid')(prediction)
+        print("pre_6---- ",prediction.shape)
+        pre_6 = prediction
+
+
+
+        # # decoder Stage 5
+        
+        X = Concatenate()([X, skip_1])
+        X = Conv2D(64, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        print("1---- ",X.shape)
+
+
+        X = Conv2DTranspose(64, (1, 1), strides=(
+            1, 1), name='conv10-1', kernel_initializer=glorot_uniform(seed=0))(X)
+        X = BatchNormalization(axis=3, name='bn_conv10-1')(X)
+        X = Activation('relu')(X)
+        X = Conv2DTranspose(32, (1, 1), strides=(
+            1, 1), name='conv10-2', kernel_initializer=glorot_uniform(seed=0))(X)
+        X = BatchNormalization(axis=3, name='bn_conv10-2')(X)
+        X = Activation('relu')(X)
+        X = Conv2DTranspose(16, (1, 1), strides=(
+            1, 1), name='conv10-3', kernel_initializer=glorot_uniform(seed=0))(X)
+        X = BatchNormalization(axis=3, name='bn_conv10-3')(X)
+        X = Activation('relu')(X)
+
+
+        X = Conv2DTranspose(1, (3, 3), strides=(2, 2), padding="same")(X)
+        outputs = Activation('sigmoid')(X)
+        print('final----', outputs.shape)
+
+        new_model = Model(inputs=model.inputs, outputs= [pre_5, pre_6 , outputs], name='ResNet_block_autoencoder')
+        # print(autoencoder.summary())
+        return new_model
+
+    def Efficient_autoencoder(self, height, width, depth):
+        inputs = Input(shape=(height, width, depth))
+        model = EfficientNetB0(include_top=False, weights='imagenet', input_shape=(height, width,3))
+        # X = model(inputs, training=True)
+        for i in range (len(model.layers)):
+            print(i,'-----', model.layers[i].name,'----', model.layers[i].output.shape )
+        model.summary()
+        return model
+
+
         
 
 
