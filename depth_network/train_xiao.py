@@ -64,11 +64,25 @@ validation_gen = get_dataset.validation_generator(batch_size)
 # # print(model_3.summary())
 
 
-# model_4
+# # model_4
+# opt = Adam(lr=1e-5)
+# model_4 = get_depth_net.ours_autoencoder(height, width, 3)
+# model_4.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/8, 1/4, 1/2])
+# # print(model_4.summary())
+
+
+# # model_5
+# opt = Adam(lr=1e-5)
+# model_5 = get_depth_net.res_50_disp_autoencoder(height, width, 3)
+# model_5.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/8, 1/4, 1/2])
+# # print(Disp_ResNet_autoencoder.summary())
+
+
+# model_6
 opt = Adam(lr=1e-5)
-model_4 = get_depth_net.ours_autoencoder(height, width, 3)
-model_4.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/8, 1/4, 1/2])
-# print(model_4.summary())
+model_6 = get_depth_net.ResNet_block_autoencoder(height, width, 3)
+model_6.compile(optimizer=opt, loss=get_loss.autoencoder_loss)
+# print(Disp_ResNet_autoencoder.summary())
 
 
 
@@ -102,8 +116,22 @@ model_4.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/
 # model_3.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
 
 
-# start training -- model_v4
-mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/model_v4/weights{epoch:08d}.h5', save_weights_only=False, period=5)
+# # start training -- model_v4
+# mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/model_v4/weights{epoch:08d}.h5', save_weights_only=False, period=5)
+# # NAME = "depth_net_2.0"
+# # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+# model_4.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
+
+
+# # start training -- model_v5
+# mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/model_v5/weights{epoch:08d}.h5', save_weights_only=False, period=5)
+# # NAME = "depth_net_2.0"
+# # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+# model_5.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
+
+
+# start training -- model_v6
+mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/model_v6/weights{epoch:08d}.h5', save_weights_only=False, period=5)
 # NAME = "depth_net_2.0"
 # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
-model_4.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
+model_6.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])

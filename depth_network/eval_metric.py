@@ -92,24 +92,26 @@ get_loss = loss.get_loss()
 #     return train_data, depth_data, mask_data
 
 def select_batch(batch_size):
-    dataset_v2 = []
-    with open(r'/tfdepth/rss/RSS/Dataset_v2/files'+'.csv','rt')as f:
-        data = csv.reader(f)
-        for row in data:
-            dataset_v2.append(row)
-    dataset_v2 = dataset_v2[7271:]
     dataset_v1 = []
-    with open(r'/tfdepth/rss/RSS/Dataset_v1/files'+'.csv','rt')as f:
+    with open(r'/tfdepth/rss/Dataset_v1/files'+'.csv','rt')as f:
         data = csv.reader(f)
         for row in data:
             dataset_v1.append(row)
-    dataset_v1 = dataset_v1[24000:]
+    # dataset_v1 = dataset_v1[7217:7300]
+    dataset_v1 = dataset_v1[7217:7320]
+    dataset_v2 = []
+    with open(r'/tfdepth/rss/Dataset_v2/files'+'.csv','rt')as f:
+        data = csv.reader(f)
+        for row in data:
+            dataset_v2.append(row)
+    # dataset_v2 = dataset_v2[41577:41700]
+    dataset_v2 = dataset_v2[41577:41650]
     merge = []
     for i in range (len(dataset_v1)):
-        string_1 = ['/tfdepth/rss/RSS/Dataset_v1/', dataset_v1[i][0], dataset_v1[i][1], dataset_v1[i][2] ]
+        string_1 = ['/tfdepth/rss/Dataset_v1/', dataset_v1[i][0], dataset_v1[i][1], dataset_v1[i][2] ]
         merge.append(string_1)
     for i in range (len(dataset_v2)):
-        string_1 = ['/tfdepth/rss/RSS/Dataset_v2/', dataset_v2[i][0], dataset_v2[i][1], dataset_v2[i][2] ]
+        string_1 = ['/tfdepth/rss/Dataset_v2/', dataset_v2[i][0], dataset_v2[i][1], dataset_v2[i][2] ]
         merge.append(string_1)
 
     N = len(merge)
@@ -170,7 +172,7 @@ train_data, depth_data = select_batch(batch_size)
 # print("depth shape [1]: ", depth_data[0].shape)
 
 
-model_path = '/tfdepth/rss/RSS/saved_model_v3'
+model_path = '/tfdepth/rss/model_v4'
 
 model_path = sorted(glob.glob(model_path + "//*"))
 
@@ -204,10 +206,10 @@ for j in range (len(model_path)):
 
         gt1 = depth1[0, :, :, 0]*para+ex
         gt2 = depth2[0, :, :, 0]*para+ex
-        # _, _, prediction1 = model.predict(rgb1)
-        # _, _, prediction2 = model.predict(rgb2)
-        prediction1 = model.predict(rgb1)
-        prediction2 = model.predict(rgb2)
+        _, _, prediction1 = model.predict(rgb1)
+        _, _, prediction2 = model.predict(rgb2)
+        # prediction1 = model.predict(rgb1)
+        # prediction2 = model.predict(rgb2)
         pred1 = prediction1[0, :, :, 0]*para+ex
         pred2 = prediction2[0, :, :, 0]*para+ex
 
@@ -264,7 +266,7 @@ for j in range (len(model_path)):
     final_result.append(result)
     K.clear_session()
 
-with open('/tfdepth/rss/RSS/depth_model_v3.txt', 'w') as f:
+with open('/tfdepth/rss/eval/eval_model_v4.txt', 'w') as f:
     for item in final_result:
         f.write("%s\n" % item)
 

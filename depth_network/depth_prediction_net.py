@@ -610,15 +610,25 @@ class get_depth_net():
         return  Disp_ResNet_autoencoder
 
     def res_50_disp_autoencoder(self, height, width, depth):
+        # inputs = Input(shape=(height, width, depth))
+        # model = ResNet50(weights='imagenet',include_top=False,input_shape=(height, width,3))
+        # # X = model(inputs, training=True)
+        # # model.summary()
+        # skip_1 = model.layers[4].output
+        # skip_2 = model.layers[38].output
+        # skip_3 = model.layers[80].output
+        # skip_4 = model.layers[142].output
+        # skip_5 = model.layers[174].output
+        # X = model.layers[-1].output
+
+        # use efficientnet as encoder
         inputs = Input(shape=(height, width, depth))
-        model = ResNet50(weights='imagenet',include_top=False,input_shape=(height, width,3))
-        # X = model(inputs, training=True)
-        # model.summary()
-        skip_1 = model.layers[4].output
-        skip_2 = model.layers[38].output
-        skip_3 = model.layers[80].output
-        skip_4 = model.layers[142].output
-        skip_5 = model.layers[174].output
+        model = EfficientNetB0(include_top=False, weights='imagenet', input_shape=(height, width,3))
+        skip_1 = model.layers[19].output
+        skip_2 = model.layers[48].output
+        skip_3 = model.layers[77].output
+        skip_4 = model.layers[164].output
+        skip_5 = model.layers[236].output
         X = model.layers[-1].output
 
 
@@ -731,28 +741,41 @@ class get_depth_net():
         return new_model
 
     def ResNet_block_autoencoder(self, height, width, depth):
-        inputs = Input(shape=(height, width, depth))
-        model = ResNet50(weights='imagenet',include_top=False,input_shape=(height, width,3))
-        # X = model(inputs, training=True)
-        # model.summary()
-        skip_1 = model.layers[4].output
-        skip_2 = model.layers[38].output
-        skip_3 = model.layers[80].output
-        skip_4 = model.layers[142].output
-        skip_5 = model.layers[174].output
-        X = model.layers[-1].output
-        print('E1-------', skip_1.shape)
-        print('E2-------', skip_2.shape)
-        print('E3-------', skip_3.shape)
-        print('E4-------', skip_4.shape)
+        # inputs = Input(shape=(height, width, depth))
+        # model = ResNet50(weights='imagenet',include_top=False,input_shape=(height, width,3))
+        # # X = model(inputs, training=True)
+        # # model.summary()
+        # skip_1 = model.layers[4].output
+        # skip_2 = model.layers[38].output
+        # skip_3 = model.layers[80].output
+        # skip_4 = model.layers[142].output
+        # skip_5 = model.layers[174].output
+        # X = model.layers[-1].output
+        # print('E1-------', skip_1.shape)
+        # print('E2-------', skip_2.shape)
+        # print('E3-------', skip_3.shape)
+        # print('E4-------', skip_4.shape)
 
-        print("5---- ",X.shape)
+        # print("5---- ",X.shape)
+
+
+        # use efficientnet as encoder
+        inputs = Input(shape=(height, width, depth))
+        model = EfficientNetB0(include_top=False, weights='imagenet', input_shape=(height, width,3))
+        skip_1 = model.layers[19].output
+        skip_2 = model.layers[48].output
+        skip_3 = model.layers[77].output
+        skip_4 = model.layers[164].output
+        skip_5 = model.layers[236].output
+        X = model.layers[-1].output
 
         # # # decoder Stage 1
         # X = Concatenate()([X, skip_5])
 
+        # X, _ = self.identity_block_transpose(
+        #     X, 3, [2048, 2048, 2048], stage=6, block='b')
         X, _ = self.identity_block_transpose(
-            X, 3, [2048, 2048, 2048], stage=6, block='b')
+            X, 3, [1280, 1280, 1280], stage=6, block='b')
         X = Conv2DTranspose(512, (1, 1), strides=(
             1, 1), padding='same', kernel_initializer=glorot_uniform(seed=0))(X)
         X, _ = self.convolutional_block_transpose(
