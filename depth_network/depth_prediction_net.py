@@ -900,8 +900,6 @@ class get_depth_net():
         pre_5 = prediction
 
         # # # decoder Stage 4
-
-        
         X = Concatenate()([X, skip_2])
         X = Conv2D(128, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
         print("2---- ",X.shape)
@@ -923,9 +921,7 @@ class get_depth_net():
         pre_6 = prediction
 
 
-
         # # decoder Stage 5
-        
         X = Concatenate()([X, skip_1])
         X = Conv2D(64, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
         print("1---- ",X.shape)
@@ -946,6 +942,108 @@ class get_depth_net():
 
 
         X = Conv2DTranspose(1, (3, 3), strides=(2, 2), padding="same")(X)
+        outputs = Activation('sigmoid')(X)
+        print('final----', outputs.shape)
+
+        new_model = Model(inputs=model.inputs, outputs= [pre_5, pre_6 , outputs], name='ResNet_block_autoencoder')
+        # print(autoencoder.summary())
+        return new_model
+
+
+    def ours_autoencoder(self, height, width, depth):
+        inputs = Input(shape=(height, width, depth))
+        model = ResNet50(weights='imagenet',include_top=False,input_shape=(height, width,3))
+        # X = model(inputs, training=True)
+        # model.summary()
+        skip_1 = model.layers[4].output
+        skip_2 = model.layers[38].output
+        skip_3 = model.layers[80].output
+        skip_4 = model.layers[142].output
+        skip_5 = model.layers[174].output
+        X = model.layers[-1].output
+        print('E1-------', skip_1.shape)
+        print('E2-------', skip_2.shape)
+        print('E3-------', skip_3.shape)
+        print('E4-------', skip_4.shape)
+
+        print("5---- ",X.shape)
+
+        # # # decoder Stage 1
+        # X = Concatenate()([X, skip_5])
+
+        X, _ = self.identity_block_transpose(
+            X, 3, [2048, 2048, 2048], stage=6, block='b')
+        X = Conv2DTranspose(512, (1, 1), strides=(
+            1, 1), padding='same', kernel_initializer=glorot_uniform(seed=0))(X)
+        X, _ = self.convolutional_block_transpose(
+            X, f=3, filters=[512, 256, 256], stage=6, block='a', s=2)
+
+
+        # # # decoder Stage 2
+        X = Concatenate()([X, skip_4])
+        X = Conv2D(512, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        print("4---- ",X.shape)
+
+        X, _ = self.identity_block_transpose(
+            X, 3, [512, 512, 512], stage=7, block='b')
+        X = Conv2DTranspose(256, (1, 1), strides=(
+            1, 1), padding='same', kernel_initializer=glorot_uniform(seed=0))(X)
+        X, _ = self.convolutional_block_transpose(
+            X, f=3, filters=[256, 128, 128], stage=7, block='a', s=2)
+        # X = Cropping2D(cropping=((1, 0), (0, 0)), data_format=None)(X)
+
+        # # decoder Stage 3
+
+        
+        X = Concatenate()([X, skip_3])
+        X = Conv2D(256, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        print("3---- ",X.shape)
+
+
+        X = Conv2DTranspose(256, kernel_size=(4, 4), strides=(2, 2), padding='same')(X)
+        X = BatchNormalization(axis=-1)(X)
+        X = Activation('relu')(X)
+        X = Conv2D(256, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        X = Activation('relu')(X)
+
+        prediction = Conv2D(1, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        prediction = Activation('sigmoid')(prediction)
+        prediction = Cropping2D(cropping=((1, 0), (0, 0)), data_format=None)(prediction)
+        print("pre_5---- ",prediction.shape)
+        pre_5 = prediction
+
+        # # # decoder Stage 4
+        X = Cropping2D(cropping=((1, 0), (0, 0)), data_format=None)(X)
+        X = Concatenate()([X, skip_2])
+        X = Conv2D(128, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        print("2---- ",X.shape)
+
+        X = Conv2DTranspose(128, kernel_size=(4, 4), strides=(2, 2), padding='same')(X)
+        X = BatchNormalization(axis=-1)(X)
+        X = Activation('relu')(X)
+        X = Conv2D(128, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        X = Activation('relu')(X)
+
+        prediction = Conv2D(1, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        prediction = Activation('sigmoid')(prediction)
+        prediction = Cropping2D(cropping=((1, 0), (0, 0)), data_format=None)(prediction)
+        print("pre_6---- ",prediction.shape)
+        pre_6 = prediction
+
+
+        # # decoder Stage 5
+        X = Cropping2D(cropping=((1, 0), (0, 0)), data_format=None)(X)
+        X = Concatenate()([X, skip_1])
+        X = Conv2D(64, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        print("1---- ",X.shape)
+
+        X = Conv2DTranspose(64, kernel_size=(4, 4), strides=(2, 2), padding='same')(X)
+        X = BatchNormalization(axis=-1)(X)
+        X = Activation('relu')(X)
+        X = Conv2D(64, kernel_size=(3, 3), strides=(1, 1), padding='same')(X)
+        X = Activation('relu')(X)
+
+        X = Conv2DTranspose(1, (3, 3), strides=(1, 1), padding="same")(X)
         outputs = Activation('sigmoid')(X)
         print('final----', outputs.shape)
 

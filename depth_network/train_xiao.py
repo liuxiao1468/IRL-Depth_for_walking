@@ -57,11 +57,18 @@ validation_gen = get_dataset.validation_generator(batch_size)
 # # print(model_2.summary())
 
 
-# model_3
+# # model_3
+# opt = Adam(lr=1e-5)
+# model_3 = get_depth_net.ResNet_resblock_disp_autoencoder(height, width, 3)
+# model_3.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/8, 1/4, 1/2])
+# # print(model_3.summary())
+
+
+# model_4
 opt = Adam(lr=1e-5)
-model_3 = get_depth_net.ResNet_resblock_disp_autoencoder(height, width, 3)
-model_3.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/8, 1/4, 1/2])
-# print(model_3.summary())
+model_4 = get_depth_net.ours_autoencoder(height, width, 3)
+model_4.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/8, 1/4, 1/2])
+# print(model_4.summary())
 
 
 
@@ -88,8 +95,15 @@ model_3.compile(optimizer=opt, loss=get_loss.autoencoder_loss, loss_weights= [1/
 # model_2.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
 
 
-# start training -- model_v3
-mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/model_v3/weights{epoch:08d}.h5', save_weights_only=False, period=5)
+# # start training -- model_v3
+# mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/model_v3/weights{epoch:08d}.h5', save_weights_only=False, period=5)
+# # NAME = "depth_net_2.0"
+# # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+# model_3.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
+
+
+# start training -- model_v4
+mc = tf.keras.callbacks.ModelCheckpoint('/tfdepth/rss/model_v4/weights{epoch:08d}.h5', save_weights_only=False, period=5)
 # NAME = "depth_net_2.0"
 # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
-model_3.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
+model_4.fit(train_gen, steps_per_epoch =1500, validation_data = validation_gen, epochs=100, validation_steps= 100, callbacks=[mc])
